@@ -1,0 +1,14 @@
+# DAY 1 — Spring Boot Foundation
+# File: .gitignore
+# Purpose: Ignore build, IDE, and environment files
+
+/target/
+/.idea/
+*.iml
+*.log
+*.class
+/.env
+.env
+.DS_Store
+/node_modules/
+/.vscode/
