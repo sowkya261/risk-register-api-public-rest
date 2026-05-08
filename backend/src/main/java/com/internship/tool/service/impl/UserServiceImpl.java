@@ -10,6 +10,7 @@ import com.internship.tool.exception.ResourceNotFoundException;
 import com.internship.tool.repository.RoleRepository;
 import com.internship.tool.repository.UserRepository;
 import com.internship.tool.service.UserService;
+import com.internship.tool.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,12 +22,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+
 @RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     public UserDto registerUser(RegisterRequest request) {
@@ -42,8 +45,10 @@ public class UserServiceImpl implements UserService {
                 .roles(Collections.singleton(userRole))
                 .enabled(true)
                 .build();
-        user = userRepository.save(user);
-        return toDto(user);
+    user = userRepository.save(user);
+    // Send registration email
+    emailService.sendRegistrationEmail(user.getEmail(), user.getFullName());
+    return toDto(user);
     }
 
     @Override
