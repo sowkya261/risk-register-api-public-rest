@@ -1,0 +1,98 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: tool101_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: tool101_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: tool101_backend
+    restart: always
+    env_file:
+      - .env.example
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - ai-service
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    command: ["java", "-jar", "app.jar"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  ai-service:
+    image: ai-service:latest
+    container_name: tool101_ai_service
+    build:
+      context: ../ai-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    image: frontend:latest
+    container_name: tool101_frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  test:
+    image: maven:3.9.6-eclipse-temurin-17
+    container_name: tool101_test
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      - backend
+    entrypoint: ["mvn", "test"]
+
+volumes:
+  pgdata:
