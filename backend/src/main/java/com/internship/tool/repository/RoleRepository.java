@@ -1,6 +1,3 @@
-// DAY 2 — Entity + Repository Layer
-// File: RoleRepository.java
-// Purpose: JPA repository for Role entity
 
 package com.internship.tool.repository;
 

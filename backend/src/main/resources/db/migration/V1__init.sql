@@ -1,6 +1,3 @@
--- DAY 2 — Entity + Repository Layer
--- File: V1__init.sql
--- Purpose: Initial Flyway migration for tables and relationships
 
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,

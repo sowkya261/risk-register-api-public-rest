@@ -1,6 +1,3 @@
-// DAY 2 — Entity + Repository Layer
-// File: UserRepository.java
-// Purpose: JPA repository for User entity
 
 package com.internship.tool.repository;
 

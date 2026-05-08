@@ -1,6 +1,3 @@
-// DAY 2 — Entity + Repository Layer
-// File: ToolRepository.java
-// Purpose: JPA repository for Tool entity
 
 package com.internship.tool.repository;
 

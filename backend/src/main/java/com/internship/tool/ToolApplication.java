@@ -1,6 +1,3 @@
-// DAY 1 — Spring Boot Foundation
-// File: ToolApplication.java
-// Purpose: Main Spring Boot application entry point
 
 package com.internship.tool;
 

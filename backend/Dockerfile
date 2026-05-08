@@ -1,6 +1,3 @@
-# DAY 1 — Spring Boot Foundation
-# File: Dockerfile
-# Purpose: Dockerize the Spring Boot backend for production
 
 FROM eclipse-temurin:17-jdk-alpine as builder
 WORKDIR /app
