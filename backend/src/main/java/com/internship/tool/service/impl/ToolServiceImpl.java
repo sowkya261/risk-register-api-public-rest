@@ -11,6 +11,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +28,9 @@ public class ToolServiceImpl implements ToolService {
     private final ToolRepository toolRepository;
 
     @Override
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "tools", allEntries = true)
     public ToolDto createTool(ToolDto toolDto) {
         Tool tool = Tool.builder()
                 .name(toolDto.getName())
@@ -35,6 +42,9 @@ public class ToolServiceImpl implements ToolService {
     }
 
     @Override
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "tools", allEntries = true)
     public ToolDto updateTool(Long id, ToolDto toolDto) {
         Tool tool = toolRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tool not found with id: " + id));
@@ -47,6 +57,9 @@ public class ToolServiceImpl implements ToolService {
 
     @Override
     @Transactional(readOnly = true)
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Cacheable(value = "tools", key = "#id")
     public ToolDto getToolById(Long id) {
         Tool tool = toolRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tool not found with id: " + id));
@@ -55,6 +68,9 @@ public class ToolServiceImpl implements ToolService {
 
     @Override
     @Transactional(readOnly = true)
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @Cacheable(value = "tools", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #search")
     public Page<ToolDto> getAllTools(String search, Pageable pageable) {
         Page<Tool> page;
         if (search != null && !search.isBlank()) {
@@ -67,6 +83,9 @@ public class ToolServiceImpl implements ToolService {
     }
 
     @Override
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "tools", allEntries = true)
     public void deleteTool(Long id) {
         Tool tool = toolRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tool not found with id: " + id));
