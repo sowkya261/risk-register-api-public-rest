@@ -14,7 +14,13 @@ if [[ "$CMD" == "docker" ]]; then
     exit 1
   fi
   cd "$BACKEND_DIR"
-  docker-compose up -d --build
+  # prefer docker-compose binary if available, otherwise use 'docker compose' plugin
+  if command -v docker-compose >/dev/null 2>&1; then
+    docker-compose up -d --build
+  else
+    echo "docker-compose not found; trying 'docker compose' plugin"
+    docker compose up -d --build
+  fi
   echo "Stack started. Backend should be available at http://localhost:8080"
   exit 0
 fi
@@ -22,7 +28,13 @@ fi
 if [[ "$CMD" == "run" ]]; then
   echo "Running backend from source (maven)..."
   cd "$BACKEND_DIR"
-  mvn -Dspring-boot.run.profiles=dev spring-boot:run
+  mvn -Dspring-boot.run.profiles=dev spring-boot:run &
+  BACKEND_PID=$!
+  # serve frontend on port 8081
+  echo "Serving frontend on http://localhost:8081"
+  (cd "$ROOT_DIR/frontend" && npx http-server -c-1 . -p 8081) &
+  FRONTEND_PID=$!
+  echo "Backend PID: $BACKEND_PID frontend PID: $FRONTEND_PID"
   exit 0
 fi
 
