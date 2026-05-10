@@ -1,0 +1,14 @@
+{
+  "name": "risk-register-screenshots",
+  "version": "1.0.0",
+  "description": "Generate 1920x1080 screenshots of the Risk Register demo frontend using Puppeteer",
+  "main": "screenshot.js",
+  "scripts": {
+    "screenshot": "node screenshot.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^20.0.0"
+  }
+}

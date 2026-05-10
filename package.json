@@ -1,0 +1,15 @@
+{
+  "name": "risk-register-api-public-rest",
+  "version": "1.0.0",
+  "description": "A small demo project: a Spring Boot-based REST API for tracking risks / tools in an internship-style sample app, with a tiny static frontend for demoing common flows (register, login, list items). This repository contains the backend service (Java / Spring Boot), a static demo frontend, and test scaffolding (unit tests + optional integration tests).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^20.9.0"
+  }
+}
