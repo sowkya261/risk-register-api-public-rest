@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tool-101 API Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Tool-101 API — Demo UI</h1>
+    <p>Use these forms to register, login and list tools for a quick demo/video.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input id="regFullName" placeholder="Full name" required />
+        <input id="regEmail" placeholder="Email" required />
+        <input id="regPassword" placeholder="Password" type="password" required />
+        <button type="submit">Register</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input id="loginEmail" placeholder="Email" required />
+        <input id="loginPassword" placeholder="Password" type="password" required />
+        <button type="submit">Login</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Tools</h2>
+      <div class="controls">
+        <button id="btnListTools">List Tools</button>
+        <button id="btnClear">Clear Output</button>
+      </div>
+      <pre id="output" class="output"></pre>
+    </section>
+  </main>
+
+  <footer>
+    <small>Backend base URL: <input id="baseUrl" value="http://localhost:8080/api" /></small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

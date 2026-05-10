@@ -1,4 +1,3 @@
-
 package com.internship.tool.service.impl;
 
 import com.internship.tool.dto.RegisterRequest;
@@ -11,25 +10,30 @@ import com.internship.tool.repository.RoleRepository;
 import com.internship.tool.repository.UserRepository;
 import com.internship.tool.service.UserService;
 import com.internship.tool.service.EmailService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-
-@RequiredArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+    }
 
     @Override
     public UserDto registerUser(RegisterRequest request) {
@@ -38,17 +42,21 @@ public class UserServiceImpl implements UserService {
         }
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new ResourceNotFoundException("Default USER role not found"));
-        User user = User.builder()
-                .email(request.getEmail())
-                .fullName(request.getFullName())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .roles(Collections.singleton(userRole))
-                .enabled(true)
-                .build();
-    user = userRepository.save(user);
-    // Send registration email
-    emailService.sendRegistrationEmail(user.getEmail(), user.getFullName());
-    return toDto(user);
+        User user = new User(
+                request.getEmail(),
+                request.getPassword() != null ? passwordEncoder.encode(request.getPassword()) : null,
+                request.getFullName(),
+                Collections.singleton(userRole),
+                true
+        );
+        user = userRepository.save(user);
+        // Send registration email; failures shouldn't block user registration
+        try {
+            emailService.sendRegistrationEmail(user.getEmail(), user.getFullName());
+        } catch (Exception ex) {
+            log.warn("Failed to send registration email to {}: {}", user.getEmail(), ex.getMessage());
+        }
+        return toDto(user);
     }
 
     @Override
@@ -60,12 +68,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserDto toDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
-                .enabled(user.isEnabled())
-                .build();
+        return new UserDto(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()),
+                user.isEnabled()
+        );
     }
 }

@@ -1,4 +1,3 @@
-
 package com.internship.tool.service.impl;
 
 import com.internship.tool.dto.ToolDto;
@@ -6,7 +5,6 @@ import com.internship.tool.entity.Tool;
 import com.internship.tool.exception.ResourceNotFoundException;
 import com.internship.tool.repository.ToolRepository;
 import com.internship.tool.service.ToolService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,26 +20,27 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class ToolServiceImpl implements ToolService {
     private final ToolRepository toolRepository;
 
-    @Override
+    public ToolServiceImpl(ToolRepository toolRepository) {
+        this.toolRepository = toolRepository;
+    }
+
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     @CacheEvict(value = "tools", allEntries = true)
     public ToolDto createTool(ToolDto toolDto) {
-        Tool tool = Tool.builder()
-                .name(toolDto.getName())
-                .description(toolDto.getDescription())
-                .active(toolDto.getActive() != null ? toolDto.getActive() : true)
-                .build();
+        Tool tool = new Tool(
+                toolDto.getName(),
+                toolDto.getDescription(),
+                toolDto.getActive() != null ? toolDto.getActive() : true
+        );
         tool = toolRepository.save(tool);
         return toDto(tool);
     }
 
-    @Override
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     @CacheEvict(value = "tools", allEntries = true)
@@ -57,7 +56,6 @@ public class ToolServiceImpl implements ToolService {
 
     @Override
     @Transactional(readOnly = true)
-    @Override
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Cacheable(value = "tools", key = "#id")
     public ToolDto getToolById(Long id) {
@@ -68,7 +66,6 @@ public class ToolServiceImpl implements ToolService {
 
     @Override
     @Transactional(readOnly = true)
-    @Override
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Cacheable(value = "tools", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #search")
     public Page<ToolDto> getAllTools(String search, Pageable pageable) {
@@ -82,7 +79,6 @@ public class ToolServiceImpl implements ToolService {
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
-    @Override
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     @CacheEvict(value = "tools", allEntries = true)

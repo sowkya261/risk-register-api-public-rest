@@ -42,15 +42,16 @@ class UserServiceTest {
 
     @Test
     void testRegisterUser_EmailExists() {
-        RegisterRequest req = RegisterRequest.builder().email("test@test.com").fullName("Test").password("pass").build();
+        RegisterRequest req = new RegisterRequest("Test", "test@test.com", "pass");
         when(userRepository.existsByEmail("test@test.com")).thenReturn(true);
         assertThrows(BadRequestException.class, () -> userService.registerUser(req));
     }
 
     @Test
     void testRegisterUser_Success() {
-        RegisterRequest req = RegisterRequest.builder().email("test@test.com").fullName("Test").password("pass").build();
-        Role role = Role.builder().id(1L).name("USER").build();
+        RegisterRequest req = new RegisterRequest("Test", "test@test.com", "pass");
+        Role role = new Role("USER");
+        role.setId(1L);
         when(userRepository.existsByEmail("test@test.com")).thenReturn(false);
         when(roleRepository.findByName("USER")).thenReturn(Optional.of(role));
         when(passwordEncoder.encode(any())).thenReturn("hashed");
@@ -65,5 +66,26 @@ class UserServiceTest {
     void testGetUserByEmail_NotFound() {
         when(userRepository.findByEmail("notfound@test.com")).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> userService.getUserByEmail("notfound@test.com"));
+    }
+
+    @Test
+    void testRegisterUser_EmailSendFails_butRegistrationSucceeds() {
+        RegisterRequest req = new RegisterRequest("Test", "test2@test.com", "pass");
+        Role role = new Role("USER");
+        role.setId(1L);
+        when(userRepository.existsByEmail("test2@test.com")).thenReturn(false);
+        when(roleRepository.findByName("USER")).thenReturn(Optional.of(role));
+        when(passwordEncoder.encode(any())).thenReturn("hashed");
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        // Simulate email sending failure - should not prevent registration
+        doThrow(new org.springframework.mail.MailSendException("SMTP failed")).when(emailService)
+                .sendRegistrationEmail(anyString(), anyString());
+
+        UserDto dto = userService.registerUser(req);
+        assertEquals("test2@test.com", dto.getEmail());
+        assertEquals("Test", dto.getFullName());
+        assertTrue(dto.getRoles().contains("USER"));
+        // verify email attempted
+        verify(emailService, times(1)).sendRegistrationEmail("test2@test.com", "Test");
     }
 }

@@ -6,20 +6,38 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class JwtUtil {
     private final String jwtSecret;
     private final long jwtExpirationMs;
     private final Key key;
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
     public JwtUtil(@Value("${jwt.secret}") String jwtSecret,
                    @Value("${jwt.expirationMs}") long jwtExpirationMs) {
         this.jwtSecret = jwtSecret;
         this.jwtExpirationMs = jwtExpirationMs;
-        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        byte[] keyBytes = jwtSecret != null ? jwtSecret.getBytes() : new byte[0];
+        // JJWT requires HMAC keys to be at least 256 bits (32 bytes). If provided secret is shorter,
+        // derive a 256-bit key using SHA-256 of the secret.
+        if (keyBytes.length < 32) {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                keyBytes = digest.digest(keyBytes);
+                log.warn("Provided JWT secret was too short; deriving a 256-bit key by hashing the secret.");
+            } catch (NoSuchAlgorithmException e) {
+                // This should never happen; SHA-256 is standard. Re-throw as runtime if it does.
+                throw new IllegalStateException("SHA-256 MessageDigest not available", e);
+            }
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(String username) {

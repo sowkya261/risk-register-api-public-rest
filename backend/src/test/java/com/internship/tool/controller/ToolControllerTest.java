@@ -3,16 +3,18 @@ package com.internship.tool.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.internship.tool.dto.ToolDto;
 import com.internship.tool.service.ToolService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 
@@ -20,14 +22,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ToolController.class)
+@ExtendWith(MockitoExtension.class)
 class ToolControllerTest {
-    @Autowired
     private MockMvc mockMvc;
-    @MockBean
+
+    @Mock
     private ToolService toolService;
-    @Autowired
-    private ObjectMapper objectMapper;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(new ToolController(toolService)).build();
+    }
 
     @Test
     void testGetAllTools() throws Exception {
@@ -41,7 +48,7 @@ class ToolControllerTest {
 
     @Test
     void testCreateTool() throws Exception {
-        ToolDto dto = ToolDto.builder().name("Tool1").description("Desc").active(true).build();
+        ToolDto dto = new ToolDto(null, "Tool1", "Desc", true);
         Mockito.when(toolService.createTool(any(ToolDto.class))).thenReturn(dto);
         mockMvc.perform(post("/api/tools")
                 .contentType(MediaType.APPLICATION_JSON)

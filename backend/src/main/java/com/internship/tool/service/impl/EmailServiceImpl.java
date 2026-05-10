@@ -1,17 +1,29 @@
 package com.internship.tool.service.impl;
 
 import com.internship.tool.service.EmailService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import jakarta.mail.internet.MimeMessage;
 
 @Service
-@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
+    private final TemplateEngine templateEngine;
+    private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
+
+    public EmailServiceImpl(JavaMailSender mailSender, TemplateEngine templateEngine) {
+        this.mailSender = mailSender;
+        this.templateEngine = templateEngine;
+    }
 
     @Value("${MAIL_FROM}")
     private String from;
@@ -19,11 +31,36 @@ public class EmailServiceImpl implements EmailService {
     @Async
     @Override
     public void sendRegistrationEmail(String to, String name) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(to);
-        message.setSubject("Welcome to Tool-101!");
-        message.setText("Hello " + name + ",\n\nThank you for registering at Tool-101.\n\nBest regards,\nTool-101 Team");
-        mailSender.send(message);
+        // Prepare Thymeleaf context
+        Context ctx = new Context();
+        ctx.setVariable("name", name);
+
+        try {
+            // Render HTML template
+            String html = templateEngine.process("emails/registration", ctx);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject("Welcome to Tool-101!");
+            helper.setText(html, true); // true = isHtml
+
+            mailSender.send(mimeMessage);
+        } catch (Exception ex) {
+            // Fallback to plaintext SimpleMailMessage
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(from);
+                message.setTo(to);
+                message.setSubject("Welcome to Tool-101!");
+                message.setText("Hello " + name + ",\n\nThank you for registering at Tool-101.\n\nBest regards,\nTool-101 Team");
+                mailSender.send(message);
+            } catch (Exception ex2) {
+                log.warn("Failed to send registration email to {}: {}", to, ex2.getMessage());
+                log.debug("Email send failure details", ex2);
+            }
+            log.debug("HTML email send failure, used plaintext fallback", ex);
+        }
     }
 }

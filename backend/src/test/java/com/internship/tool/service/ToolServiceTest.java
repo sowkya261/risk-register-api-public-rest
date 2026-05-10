@@ -36,8 +36,9 @@ class ToolServiceTest {
 
     @Test
     void testCreateTool() {
-        ToolDto dto = ToolDto.builder().name("Tool1").description("Desc").active(true).build();
-        Tool tool = Tool.builder().id(1L).name("Tool1").description("Desc").active(true).build();
+        ToolDto dto = new ToolDto(null, "Tool1", "Desc", true);
+        Tool tool = new Tool("Tool1", "Desc", true);
+        tool.setId(1L);
         when(toolRepository.save(any(Tool.class))).thenReturn(tool);
         ToolDto result = toolService.createTool(dto);
         assertEquals("Tool1", result.getName());
@@ -53,8 +54,10 @@ class ToolServiceTest {
 
     @Test
     void testGetAllTools() {
-        Tool tool1 = Tool.builder().id(1L).name("Tool1").description("Desc1").active(true).build();
-        Tool tool2 = Tool.builder().id(2L).name("Tool2").description("Desc2").active(true).build();
+        Tool tool1 = new Tool("Tool1", "Desc1", true);
+        tool1.setId(1L);
+        Tool tool2 = new Tool("Tool2", "Desc2", true);
+        tool2.setId(2L);
         List<Tool> tools = Arrays.asList(tool1, tool2);
         Pageable pageable = PageRequest.of(0, 10);
         when(toolRepository.findAll(pageable)).thenReturn(new PageImpl<>(tools));
