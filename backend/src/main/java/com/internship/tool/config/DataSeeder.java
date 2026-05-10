@@ -61,7 +61,22 @@ public class DataSeeder implements CommandLineRunner {
                 new Tool("Ladder", "6ft step ladder", true),
                 new Tool("Paint Brush", "2-inch paint brush", true),
                 new Tool("Socket Set", "Metric socket set", true),
-                new Tool("Stud Finder", "Electronic stud finder", true)
+                new Tool("Stud Finder", "Electronic stud finder", true),
+                new Tool("Nail Gun", "Pneumatic nail gun", true),
+                new Tool("Circular Saw", "Electric circular saw", true),
+                new Tool("Router", "Woodworking router", true),
+                new Tool("Jigsaw", "Electric jigsaw", true),
+                new Tool("Planer", "Hand planer", true),
+                new Tool("Awl", "Marking awl", true),
+                new Tool("Bolt Cutter", "Heavy bolt cutter", true),
+                new Tool("Angle Grinder", "Electric angle grinder", true),
+                new Tool("Pipe Wrench", "Plumbing pipe wrench", true),
+                new Tool("Hacksaw", "Metal hacksaw", true),
+                new Tool("Caulking Gun", "Standard caulking gun", true),
+                new Tool("Heat Gun", "Electric heat gun", true),
+                new Tool("Multimeter", "Digital multimeter", true),
+                new Tool("Wire Stripper", "Automatic wire stripper", true),
+                new Tool("Work Light", "Portable LED work light", true)
             ));
         }
     }
