@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tool-101 Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <header>
+    <h1>Dashboard — KPIs & Tools</h1>
+  </header>
+  <main>
+    <section id="kpis" class="kpi-grid">
+      <!-- KPI cards will be injected here -->
+    </section>
+
+    <section class="controls">
+      <input id="searchBox" placeholder="Search tools" />
+      <button id="btnExport">Export CSV</button>
+      <button id="btnRefresh">Refresh KPIs</button>
+    </section>
+
+    <section id="toolsList">
+      <table id="toolsTable">
+        <thead>
+          <tr><th>Id</th><th>Title</th><th>Owner</th><th>Created</th><th>Active</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <aside id="auditDrawer">
+      <h3>Audit log</h3>
+      <ul id="auditList"></ul>
+    </aside>
+  </main>
+  <script src="dashboard.js"></script>
+</body>
+</html>

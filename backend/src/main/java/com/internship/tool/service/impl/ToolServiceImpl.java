@@ -18,14 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.internship.tool.service.AuditService;
+import com.internship.tool.service.EmailService;
 
 @Service
 @Transactional
 public class ToolServiceImpl implements ToolService {
     private final ToolRepository toolRepository;
+    private final AuditService auditService;
+    private final EmailService emailService;
 
-    public ToolServiceImpl(ToolRepository toolRepository) {
+    public ToolServiceImpl(ToolRepository toolRepository, AuditService auditService, EmailService emailService) {
         this.toolRepository = toolRepository;
+        this.auditService = auditService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -38,6 +44,15 @@ public class ToolServiceImpl implements ToolService {
                 toolDto.getActive() != null ? toolDto.getActive() : true
         );
         tool = toolRepository.save(tool);
+        // audit log
+        try {
+            auditService.log("system", "CREATE_TOOL", String.valueOf(tool.getId()), "{\"title\":\"" + tool.getName() + "\"}");
+        } catch (Exception ignored) {}
+        // async email notify admin (best effort)
+        try {
+            emailService.sendMultipartEmail("admin@localhost", "New tool created", "A new tool was created: " + tool.getName(), "<p>A new tool was created: <strong>" + tool.getName() + "</strong></p>");
+        } catch (Exception ignored) {}
+
         return toDto(tool);
     }
 
