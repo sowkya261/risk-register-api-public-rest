@@ -2,6 +2,7 @@ package com.internship.tool.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 
 public class ToolDto {
     private Long id;
@@ -14,6 +15,9 @@ public class ToolDto {
     private String description;
 
     private Boolean active;
+
+    // optional: creation timestamp copied from entity
+    private Instant createdAt;
 
     public ToolDto() {}
 
@@ -32,4 +36,6 @@ public class ToolDto {
     public void setDescription(String description) { this.description = description; }
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

@@ -91,6 +91,10 @@ public class ToolServiceImpl implements ToolService {
     private ToolDto toDto(Tool tool) {
         ToolDto dto = new ToolDto();
         BeanUtils.copyProperties(tool, dto);
+        // copy timestamps if present
+        try {
+            dto.setCreatedAt(tool.getCreatedAt());
+        } catch (Exception ignored) {}
         return dto;
     }
 }

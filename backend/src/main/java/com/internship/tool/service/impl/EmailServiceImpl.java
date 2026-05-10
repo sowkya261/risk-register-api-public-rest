@@ -39,14 +39,9 @@ public class EmailServiceImpl implements EmailService {
             // Render HTML template
             String html = templateEngine.process("emails/registration", ctx);
 
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-            helper.setFrom(from);
-            helper.setTo(to);
-            helper.setSubject("Welcome to Tool-101!");
-            helper.setText(html, true); // true = isHtml
+            String text = "Hello " + name + ",\n\nThank you for registering at Tool-101.\n\nBest regards,\nTool-101 Team";
 
-            mailSender.send(mimeMessage);
+            sendMultipartEmail(to, "Welcome to Tool-101!", text, html);
         } catch (Exception ex) {
             // Fallback to plaintext SimpleMailMessage
             try {
@@ -61,6 +56,27 @@ public class EmailServiceImpl implements EmailService {
                 log.debug("Email send failure details", ex2);
             }
             log.debug("HTML email send failure, used plaintext fallback", ex);
+        }
+    }
+
+    @Override
+    public void sendMultipartEmail(String to, String subject, String textBody, String htmlBody) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            // true = multipart
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+
+            // set the plain text as the alternative
+            helper.setText(textBody, htmlBody);
+
+            mailSender.send(mimeMessage);
+        } catch (Exception ex) {
+            log.warn("Failed to send multipart email to {}: {}", to, ex.getMessage());
+            log.debug("Multipart email failure details", ex);
+            // propagate to caller if needed (here we choose to swallow - consistent with previous behavior)
         }
     }
 }
